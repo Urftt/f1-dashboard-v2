@@ -4,10 +4,12 @@ import QualiPage from './pages/QualiPage'
 import PracticePage from './pages/PracticePage'
 import WeekendPicker from './components/WeekendPicker'
 import { WeekendProvider } from './data/WeekendContext'
+import { ClockProvider } from './replay/ClockContext'
 
 export default function App() {
   return (
     <WeekendProvider>
+      <ClockProvider>
       <div className="app">
         <header className="topbar">
           <div className="brand">
@@ -35,6 +37,7 @@ export default function App() {
           </Routes>
         </main>
       </div>
+      </ClockProvider>
     </WeekendProvider>
   )
 }
