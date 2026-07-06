@@ -1,6 +1,7 @@
 // Replay clock controls: mode toggle, sync anchors, transport, status.
+// Keyboard: space = play/pause, ←/→ = ±5s, shift+←/→ = ±30s, L = lights out.
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useClock } from '../replay/ClockContext'
 import { lapStartTime, type ClampedSession, type PreparedSession } from '../replay/clamp'
 
@@ -68,6 +69,29 @@ export default function ClockBar({ clamped, UNSAFE_prep }: Props) {
   const isRace = clamped.session.session_type === 'Race'
   const startMs = UNSAFE_prep.raceStartMs ?? UNSAFE_prep.firstDataMs
   const elapsed = synced && startMs != null ? t - startMs : null
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const el = e.target as HTMLElement | null
+      if (el && ['INPUT', 'SELECT', 'TEXTAREA'].includes(el.tagName)) return
+      if (mode !== 'replay') return
+      if (e.code === 'Space') {
+        e.preventDefault()
+        if (t != null) (playing ? pause : play)()
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault()
+        nudge(e.shiftKey ? -30_000 : -5_000)
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault()
+        nudge(e.shiftKey ? 30_000 : 5_000)
+      } else if (e.key === 'l' || e.key === 'L') {
+        lightsOut()
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mode, playing, t == null, UNSAFE_prep])
 
   return (
     <div className="clockbar">

@@ -33,10 +33,34 @@ interface ClockState {
 
 const Ctx = createContext<ClockState | null>(null)
 
+// Survive accidental reloads mid-replay: the clock state is persisted per
+// tab and restored with elapsed real time added back while playing.
+const STORAGE_KEY = 'pitwall-clock'
+
+interface StoredClock {
+  t: number | null
+  playing: boolean
+  mode: ClockMode
+  savedAt: number
+}
+
+function loadStored(): StoredClock | null {
+  try {
+    const raw = sessionStorage.getItem(STORAGE_KEY)
+    if (!raw) return null
+    return JSON.parse(raw) as StoredClock
+  } catch {
+    return null
+  }
+}
+
 export function ClockProvider({ children }: { children: ReactNode }) {
-  const [t, setT] = useState<number | null>(null)
-  const [playing, setPlaying] = useState(false)
-  const [mode, setMode] = useState<ClockMode>('replay')
+  const stored = useRef(loadStored()).current
+  const [t, setT] = useState<number | null>(() =>
+    stored?.t != null ? stored.t + (stored.playing ? Date.now() - stored.savedAt : 0) : null,
+  )
+  const [playing, setPlaying] = useState(stored?.playing ?? false)
+  const [mode, setMode] = useState<ClockMode>(stored?.mode ?? 'replay')
   const lastReal = useRef<number>(0)
 
   useEffect(() => {
@@ -51,6 +75,17 @@ export function ClockProvider({ children }: { children: ReactNode }) {
     return () => clearInterval(id)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [playing, t == null])
+
+  useEffect(() => {
+    try {
+      sessionStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify({ t, playing, mode, savedAt: Date.now() } satisfies StoredClock),
+      )
+    } catch {
+      // storage full/unavailable — replay still works, just won't survive reload
+    }
+  }, [t, playing, mode])
 
   const syncTo = useCallback((tMs: number, opts?: { play?: boolean }) => {
     setT(tMs)
