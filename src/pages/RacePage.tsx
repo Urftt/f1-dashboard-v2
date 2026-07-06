@@ -8,6 +8,7 @@ import DriverSelect, { useSelectedDrivers } from '../components/DriverSelect'
 import LapChart from '../components/LapChart'
 import GapChart from '../components/GapChart'
 import TimingBoard from '../components/TimingBoard'
+import PitWindow from '../components/PitWindow'
 import { useClock } from '../replay/ClockContext'
 
 export default function RacePage() {
@@ -46,6 +47,7 @@ export default function RacePage() {
             selected={selected}
             onSelect={setSelected}
           />
+          <PitWindow clamped={clamped} selected={selected} />
         </div>
       </div>
     </div>

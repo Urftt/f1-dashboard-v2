@@ -499,3 +499,66 @@ table.timing .compound {
 table.timing .age {
   color: var(--text-faint);
 }
+
+/* ---- pit window ---- */
+
+.pitloss {
+  color: var(--text-muted);
+  font-size: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.pitloss .hint {
+  color: var(--text-faint);
+}
+
+.pitrows {
+  display: grid;
+  gap: 8px;
+}
+
+.pitrow {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 12.5px;
+  flex-wrap: wrap;
+}
+
+.pitrow .teambar {
+  display: inline-block;
+  width: 3px;
+  height: 11px;
+  border-radius: 1px;
+  align-self: center;
+}
+
+.pitrow .who {
+  font-weight: 700;
+  width: 36px;
+}
+
+.pitrow .traffic {
+  color: var(--yellow);
+}
+
+.pitrow .clear-air {
+  color: var(--green);
+}
+
+.pitrow .undercut {
+  color: var(--text-muted);
+  margin-left: auto;
+}
+
+.pitrow .viable {
+  color: var(--green);
+}
+
+.race-grid .right {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
