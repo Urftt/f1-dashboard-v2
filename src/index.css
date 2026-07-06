@@ -562,3 +562,13 @@ table.timing .age {
   gap: 12px;
   min-width: 0;
 }
+
+.subtabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+table.timing tr.cutoff td {
+  border-bottom: 2px solid var(--accent);
+}

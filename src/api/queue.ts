@@ -38,6 +38,8 @@ async function dispatch(path: string): Promise<unknown> {
       await sleep(1000 * 2 ** attempt + Math.random() * 300)
       continue
     }
+    // OpenF1 signals "no rows for this query" with a 404
+    if (res.status === 404) return []
     if (!res.ok) throw new Error(`OpenF1 ${res.status}: ${path}`)
     return res.json()
   }

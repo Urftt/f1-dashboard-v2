@@ -65,8 +65,9 @@ export default function ClockBar({ clamped, UNSAFE_prep }: Props) {
     }
   }
 
-  const elapsed =
-    synced && UNSAFE_prep.raceStartMs != null ? t - UNSAFE_prep.raceStartMs : null
+  const isRace = clamped.session.session_type === 'Race'
+  const startMs = UNSAFE_prep.raceStartMs ?? UNSAFE_prep.firstDataMs
+  const elapsed = synced && startMs != null ? t - startMs : null
 
   return (
     <div className="clockbar">
@@ -86,8 +87,8 @@ export default function ClockBar({ clamped, UNSAFE_prep }: Props) {
       {replay && (
         <>
           <span className="sep" />
-          <button className="primary" onClick={lightsOut} title="Sync to race start">
-            ● Lights out
+          <button className="primary" onClick={lightsOut} title="Sync to session start">
+            ● {isRace ? 'Lights out' : 'Session start'}
           </button>
           <button className={syncOpen ? 'toggled' : ''} onClick={() => setSyncOpen((v) => !v)}>
             Sync…
@@ -158,10 +159,11 @@ export default function ClockBar({ clamped, UNSAFE_prep }: Props) {
           <span className="spacer" />
           <span className="status num">
             {!synced && 'not synced'}
-            {synced && elapsed != null && elapsed < 0 && `race start in ${fmtElapsed(-elapsed).slice(1)}`}
+            {synced && elapsed != null && elapsed < 0 && `start in ${fmtElapsed(-elapsed).slice(1)}`}
             {synced && elapsed != null && elapsed >= 0 && (
               <>
-                LAP {clamped.currentLap} · {fmtElapsed(elapsed)}
+                {isRace && <>LAP {clamped.currentLap} · </>}
+                {fmtElapsed(elapsed)}
               </>
             )}
             {synced && elapsed == null && 'synced'}
