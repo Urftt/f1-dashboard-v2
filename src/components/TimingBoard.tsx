@@ -27,6 +27,8 @@ interface Props {
 interface BoardRow {
   driver: number
   position: number | null
+  gridDelta: number | null
+  trend: -1 | 0 | 1
   compound: string | null
   tyreAge: number | null
   lastLap: number | null
@@ -40,11 +42,28 @@ export default function TimingBoard({ clamped, t, selected, onSelect }: Props) {
   const [gapMode, setGapMode] = useState<'interval' | 'leader'>('interval')
 
   const rows = useMemo(() => {
-    // latest position + interval row per driver (arrays are date-sorted)
+    // latest position + interval row per driver (arrays are date-sorted);
+    // also grid position (first position event) and gap 90s ago for trends
     const lastPos = new Map<number, number>()
-    for (const p of clamped.positions) lastPos.set(p.driver_number, p.position)
+    const gridPos = new Map<number, number>()
+    for (const p of clamped.positions) {
+      lastPos.set(p.driver_number, p.position)
+      if (!gridPos.has(p.driver_number)) gridPos.set(p.driver_number, p.position)
+    }
     const lastInt = new Map<number, IntervalRow>()
-    for (const r of clamped.intervals) lastInt.set(r.driver_number, r)
+    const pastGtl = new Map<number, number>() // gap_to_leader ~90s before latest
+    const latestDate = clamped.intervals.length
+      ? new Date(clamped.intervals[clamped.intervals.length - 1].date).getTime()
+      : 0
+    for (const r of clamped.intervals) {
+      lastInt.set(r.driver_number, r)
+      if (
+        typeof r.gap_to_leader === 'number' &&
+        new Date(r.date).getTime() <= latestDate - 90_000
+      ) {
+        pastGtl.set(r.driver_number, r.gap_to_leader)
+      }
+    }
 
     const out: BoardRow[] = clamped.drivers.map((d) => {
       const n = d.driver_number
@@ -63,10 +82,23 @@ export default function TimingBoard({ clamped, t, selected, onSelect }: Props) {
         stale = lastSeen > 0 && t - lastSeen > STALE_MS
       }
 
+      // gaining/losing vs leader over the last ~90s
+      let trend: -1 | 0 | 1 = 0
+      const past = pastGtl.get(n)
+      if (past != null && typeof int?.gap_to_leader === 'number') {
+        const delta = int.gap_to_leader - past
+        if (delta < -0.4) trend = -1 // closing on leader
+        else if (delta > 0.4) trend = 1
+      }
+
+      const pos = lastPos.get(n) ?? null
+      const grid = gridPos.get(n) ?? null
       const currentLapNum = lastLap ? lastLap.lap_number + 1 : 1
       return {
         driver: n,
-        position: lastPos.get(n) ?? null,
+        position: pos,
+        gridDelta: pos != null && grid != null ? grid - pos : null,
+        trend,
         compound: stint?.compound ?? null,
         tyreAge: stint ? (stint.tyre_age_at_start ?? 0) + (currentLapNum - stint.lap_start) : null,
         lastLap: lastLap?.lap_duration ?? null,
@@ -117,6 +149,9 @@ export default function TimingBoard({ clamped, t, selected, onSelect }: Props) {
           <thead>
             <tr>
               <th className="r">P</th>
+              <th className="r" title="positions gained/lost vs grid">
+                +/−
+              </th>
               <th>Driver</th>
               <th>Tyre</th>
               <th className="r">Last</th>
@@ -144,6 +179,15 @@ export default function TimingBoard({ clamped, t, selected, onSelect }: Props) {
                   title={`${d.full_name} — click to plot`}
                 >
                   <td className="r pos">{r.position ?? '·'}</td>
+                  <td className="r griddelta">
+                    {r.gridDelta == null || r.gridDelta === 0 ? (
+                      ''
+                    ) : r.gridDelta > 0 ? (
+                      <span className="up">▲{r.gridDelta}</span>
+                    ) : (
+                      <span className="down">▼{-r.gridDelta}</span>
+                    )}
+                  </td>
                   <td>
                     <span className="teambar" style={{ background: driverColor(d.team_colour) }} />
                     {d.name_acronym}
@@ -164,7 +208,19 @@ export default function TimingBoard({ clamped, t, selected, onSelect }: Props) {
                     )}
                   </td>
                   <td className="r">{r.stale ? 'no data' : fmtLapTime(r.lastLap)}</td>
-                  <td className="r">{r.stale ? '' : isLeader ? '—' : fmtGap(gap)}</td>
+                  <td className="r">
+                    {r.stale ? (
+                      ''
+                    ) : isLeader ? (
+                      '—'
+                    ) : (
+                      <>
+                        {r.trend === -1 && <span className="up">▲</span>}
+                        {r.trend === 1 && <span className="down">▼</span>}
+                        {fmtGap(gap)}
+                      </>
+                    )}
+                  </td>
                   <td className="r">{r.pitCount || ''}</td>
                 </tr>
               )

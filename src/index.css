@@ -742,3 +742,19 @@ table.timing tr.cutoff td {
 .rc-feed li.rc-yellow .rc-msg {
   color: #d9c26a;
 }
+
+table.timing .up {
+  color: var(--green);
+  font-size: 10px;
+  margin-right: 2px;
+}
+
+table.timing .down {
+  color: #e06c66;
+  font-size: 10px;
+  margin-right: 2px;
+}
+
+table.timing .griddelta {
+  font-size: 10.5px;
+}
