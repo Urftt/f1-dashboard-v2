@@ -29,6 +29,8 @@ interface BoardRow {
   position: number | null
   gridDelta: number | null
   trend: -1 | 0 | 1
+  isPersonalBest: boolean
+  personalBest: number | null
   compound: string | null
   tyreAge: number | null
   lastLap: number | null
@@ -94,11 +96,17 @@ export default function TimingBoard({ clamped, t, selected, onSelect }: Props) {
       const pos = lastPos.get(n) ?? null
       const grid = gridPos.get(n) ?? null
       const currentLapNum = lastLap ? lastLap.lap_number + 1 : 1
+      const personalBest = laps.reduce<number | null>(
+        (best, l) => (l.lap_duration != null && (best == null || l.lap_duration < best) ? l.lap_duration : best),
+        null,
+      )
       return {
         driver: n,
         position: pos,
         gridDelta: pos != null && grid != null ? grid - pos : null,
         trend,
+        isPersonalBest: lastLap?.lap_duration != null && lastLap.lap_duration === personalBest,
+        personalBest,
         compound: stint?.compound ?? null,
         tyreAge: stint ? (stint.tyre_age_at_start ?? 0) + (currentLapNum - stint.lap_start) : null,
         lastLap: lastLap?.lap_duration ?? null,
@@ -119,6 +127,10 @@ export default function TimingBoard({ clamped, t, selected, onSelect }: Props) {
   }, [clamped, t])
 
   const anyData = rows.some((r) => r.position != null)
+  const sessionBest = rows.reduce<number | null>(
+    (best, r) => (r.personalBest != null && (best == null || r.personalBest < best) ? r.personalBest : best),
+    null,
+  )
 
   return (
     <div className="panel">
@@ -207,7 +219,21 @@ export default function TimingBoard({ clamped, t, selected, onSelect }: Props) {
                       '—'
                     )}
                   </td>
-                  <td className="r">{r.stale ? 'no data' : fmtLapTime(r.lastLap)}</td>
+                  <td
+                    className="r"
+                    style={
+                      r.stale || !r.isPersonalBest
+                        ? undefined
+                        : {
+                            color:
+                              r.lastLap != null && r.lastLap === sessionBest
+                                ? 'var(--purple)'
+                                : 'var(--green)',
+                          }
+                    }
+                  >
+                    {r.stale ? 'no data' : fmtLapTime(r.lastLap)}
+                  </td>
                   <td className="r">
                     {r.stale ? (
                       ''
