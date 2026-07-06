@@ -4,6 +4,8 @@ import { ensureSessionLoaded, useSessionEntry } from '../data/sessionStore'
 import { useClampedSession } from '../replay/useClampedSession'
 import LoadingChecklist from '../components/LoadingChecklist'
 import ClockBar from '../components/ClockBar'
+import DriverSelect, { useSelectedDrivers } from '../components/DriverSelect'
+import LapChart from '../components/LapChart'
 
 export default function RacePage() {
   const { sessions, meeting, loading, error } = useWeekend()
@@ -15,6 +17,7 @@ export default function RacePage() {
 
   const entry = useSessionEntry(race?.session_key ?? null)
   const { clamped, UNSAFE_prep } = useClampedSession(race)
+  const [selected, setSelected] = useSelectedDrivers()
 
   if (error) return <div className="placeholder">{error}</div>
   if (loading || !meeting) return <div className="placeholder">Loading weekend…</div>
@@ -26,11 +29,19 @@ export default function RacePage() {
   return (
     <div>
       <ClockBar clamped={clamped} UNSAFE_prep={UNSAFE_prep} />
-      {/* debug readout — replaced by charts in later phases */}
-      <div className="placeholder num">
-        visible: {clamped.laps.length} laps · {clamped.intervals.length} intervals ·{' '}
-        {clamped.pits.length} pit stops · {clamped.raceControl.length} RC msgs · lap{' '}
-        {clamped.currentLap}
+      <DriverSelect drivers={clamped.drivers} selected={selected} onChange={setSelected} />
+      <div className="race-grid">
+        <div className="left">
+          <LapChart clamped={clamped} selected={selected} />
+        </div>
+        <div className="right">
+          <div className="panel">
+            <div className="panel-head">
+              <h3>Timing</h3>
+            </div>
+            <div className="placeholder">Timing board — phase 5</div>
+          </div>
+        </div>
       </div>
     </div>
   )

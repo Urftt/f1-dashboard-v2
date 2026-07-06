@@ -305,3 +305,116 @@ button:focus-visible {
   color: var(--text-faint);
   font-size: 12px;
 }
+
+/* ---- driver chips ---- */
+
+.driver-select {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px 3px 7px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.chip .swatch {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+}
+
+.chip.on {
+  background: #181d29;
+}
+
+.chip.clear {
+  color: var(--text-faint);
+}
+
+/* ---- charts ---- */
+
+.chart-tooltip {
+  background: #0e1118;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  padding: 8px 10px;
+  font-size: 12px;
+}
+
+.chart-tooltip .tt-title {
+  color: var(--text-faint);
+  margin-bottom: 4px;
+  font-size: 11px;
+}
+
+.chart-tooltip .tt-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  line-height: 1.6;
+}
+
+.chart-tooltip .dot,
+.legend .dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.chart-tooltip .acr {
+  width: 34px;
+  color: var(--text);
+}
+
+.chart-tooltip .compound {
+  width: 12px;
+  font-weight: 700;
+}
+
+.chart-tooltip .val {
+  margin-left: auto;
+  padding-left: 12px;
+}
+
+.legend {
+  display: inline-flex;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-mono);
+}
+
+/* ---- race page grid ---- */
+
+.race-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: 12px;
+  align-items: start;
+}
+
+.race-grid .left {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+
+@media (max-width: 1100px) {
+  .race-grid {
+    grid-template-columns: 1fr;
+  }
+}
