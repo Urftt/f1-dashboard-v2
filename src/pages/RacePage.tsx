@@ -7,6 +7,8 @@ import ClockBar from '../components/ClockBar'
 import DriverSelect, { useSelectedDrivers } from '../components/DriverSelect'
 import LapChart from '../components/LapChart'
 import GapChart from '../components/GapChart'
+import TimingBoard from '../components/TimingBoard'
+import { useClock } from '../replay/ClockContext'
 
 export default function RacePage() {
   const { sessions, meeting, loading, error } = useWeekend()
@@ -19,6 +21,7 @@ export default function RacePage() {
   const entry = useSessionEntry(race?.session_key ?? null)
   const { clamped, UNSAFE_prep } = useClampedSession(race)
   const [selected, setSelected] = useSelectedDrivers()
+  const { t, mode } = useClock()
 
   if (error) return <div className="placeholder">{error}</div>
   if (loading || !meeting) return <div className="placeholder">Loading weekend…</div>
@@ -37,12 +40,12 @@ export default function RacePage() {
           <GapChart clamped={clamped} selected={selected} />
         </div>
         <div className="right">
-          <div className="panel">
-            <div className="panel-head">
-              <h3>Timing</h3>
-            </div>
-            <div className="placeholder">Timing board — phase 5</div>
-          </div>
+          <TimingBoard
+            clamped={clamped}
+            t={mode === 'full' ? null : t}
+            selected={selected}
+            onSelect={setSelected}
+          />
         </div>
       </div>
     </div>
