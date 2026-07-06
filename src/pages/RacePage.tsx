@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useWeekend } from '../data/WeekendContext'
 import { ensureSessionLoaded, useSessionEntry } from '../data/sessionStore'
 import { useClampedSession } from '../replay/useClampedSession'
@@ -9,11 +9,19 @@ import LapChart from '../components/LapChart'
 import GapChart from '../components/GapChart'
 import TimingBoard from '../components/TimingBoard'
 import PitWindow from '../components/PitWindow'
+import LiveControl, { isSessionLiveNow } from '../components/LiveControl'
 import { useClock } from '../replay/ClockContext'
 
 export default function RacePage() {
   const { sessions, meeting, loading, error } = useWeekend()
-  const race = sessions.find((s) => s.session_name === 'Race') ?? null
+  // sprint weekends have two race-type sessions: Sprint and Race
+  const raceSessions = sessions.filter((s) => s.session_type === 'Race')
+  const [pick, setPick] = useState<number | null>(null)
+  const race =
+    raceSessions.find((s) => s.session_key === pick) ??
+    raceSessions.find((s) => s.session_name === 'Race') ??
+    raceSessions[0] ??
+    null
 
   useEffect(() => {
     if (race) ensureSessionLoaded(race)
@@ -34,6 +42,22 @@ export default function RacePage() {
   return (
     <div>
       <ClockBar clamped={clamped} UNSAFE_prep={UNSAFE_prep} />
+      <div className="race-toolbar">
+        {raceSessions.length > 1 && (
+          <div className="subtabs">
+            {raceSessions.map((s) => (
+              <button
+                key={s.session_key}
+                className={s.session_key === race.session_key ? 'toggled' : ''}
+                onClick={() => setPick(s.session_key)}
+              >
+                {s.session_name}
+              </button>
+            ))}
+          </div>
+        )}
+        {isSessionLiveNow(race) && <LiveControl session={race} />}
+      </div>
       <DriverSelect drivers={clamped.drivers} selected={selected} onChange={setSelected} />
       <div className="race-grid">
         <div className="left">
