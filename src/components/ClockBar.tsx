@@ -202,6 +202,20 @@ export default function ClockBar({ clamped, UNSAFE_prep }: Props) {
           <span className="status spoiler-note">full session visible — spoilers</span>
         </>
       )}
+
+      <Weather clamped={clamped} />
     </div>
+  )
+}
+
+function Weather({ clamped }: { clamped: ClampedSession }) {
+  const w = clamped.weather.length ? clamped.weather[clamped.weather.length - 1] : null
+  if (!w) return null
+  return (
+    <span className="weather num">
+      {w.track_temperature != null && <>trk {Math.round(w.track_temperature)}°</>}
+      {w.air_temperature != null && <> · air {Math.round(w.air_temperature)}°</>}
+      {(w.rainfall ?? 0) > 0 && <span className="rain"> · RAIN</span>}
+    </span>
   )
 }

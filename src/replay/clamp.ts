@@ -24,6 +24,7 @@ import type {
   RawSessionData,
   Session,
   Stint,
+  WeatherRow,
 } from '../api/types'
 
 export interface PreparedLap extends Lap {
@@ -48,6 +49,7 @@ export interface PreparedSession {
   intervals: Timed<IntervalRow>
   raceControl: Timed<RaceControlMsg>
   positions: Timed<PositionRow>
+  weather: Timed<WeatherRow>
   /** median lap-1 start across drivers = lights out; null for non-races */
   raceStartMs: number | null
   /** first and last data timestamps (for sanity/UI) */
@@ -64,6 +66,7 @@ export interface ClampedSession {
   intervals: IntervalRow[]
   raceControl: RaceControlMsg[]
   positions: PositionRow[]
+  weather: WeatherRow[]
   /** last completed lap per driver at T */
   lastLapByDriver: Map<number, number>
   /** current race lap = max over drivers of lastCompleted+1 */
@@ -164,6 +167,7 @@ export function prepareSession(data: Partial<RawSessionData>, session: Session):
     intervals,
     raceControl: timed(data.raceControl ?? [], (r) => r.date),
     positions,
+    weather: timed(data.weather ?? [], (r) => r.date),
     raceStartMs,
     firstDataMs: firstCandidates.length ? Math.min(...firstCandidates) : null,
   }
@@ -217,6 +221,7 @@ export function clampPrepared(prep: PreparedSession, t: number | null): ClampedS
       ? prep.raceControl.rows
       : prep.raceControl.rows.slice(0, cut(prep.raceControl.times, t)),
     positions: full ? prep.positions.rows : prep.positions.rows.slice(0, cut(prep.positions.times, t)),
+    weather: full ? prep.weather.rows : prep.weather.rows.slice(0, cut(prep.weather.times, t)),
     lastLapByDriver,
     currentLap,
     raceStartMs: prep.raceStartMs,

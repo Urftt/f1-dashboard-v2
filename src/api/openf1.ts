@@ -11,6 +11,7 @@ import type {
   Session,
   SessionResultRow,
   Stint,
+  WeatherRow,
 } from './types'
 
 // Completed sessions are immutable -> cache forever. Lists (meetings,
@@ -79,6 +80,7 @@ export const getIntervals = (s: Session, live = false) => dataset<IntervalRow>('
 export const getRaceControl = (s: Session, live = false) =>
   dataset<RaceControlMsg>('race_control', s, live)
 export const getPositions = (s: Session, live = false) => dataset<PositionRow>('position', s, live)
+export const getWeather = (s: Session, live = false) => dataset<WeatherRow>('weather', s, live)
 
 /**
  * SPOILER endpoint — final classification. Must only be called from

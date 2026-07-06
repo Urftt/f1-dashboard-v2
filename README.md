@@ -40,10 +40,13 @@ classification endpoint is never fetched in replay mode.
 ## Pages
 
 - **Race** — lap-time chart (tyre-compound dots, in/out + SC/VSC laps
-  filterable), pairwise gap chart with closing-rate projection, timing board
-  (interval ↔ gap-to-leader), pit-window/undercut panel. Sprint sessions get
-  their own tab on sprint weekends. A **Go live** toggle appears while a
-  session is actually running (OpenF1's free tier may lag the broadcast).
+  filterable), pairwise gap chart with closing-rate projection, lap-by-lap
+  position chart, whole-field tyre-strategy timeline, timing board
+  (interval ↔ gap-to-leader, grid +/−, gain/lose trend arrows), race-control
+  feed, pit-window/undercut panel, live track/air temperature. Sprint
+  sessions get their own tab on sprint weekends. A **Go live** toggle appears
+  while a session is actually running (OpenF1's free tier may lag the
+  broadcast).
 - **Qualifying** — Q1/Q2/Q3 classification with elimination cutoffs and a
   flying-lap evolution chart. Replayable like the race.
 - **Practice** — long-run detection, race-pace vs best-lap table, tyre

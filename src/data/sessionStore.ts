@@ -14,6 +14,7 @@ import {
   getPositions,
   getRaceControl,
   getStints,
+  getWeather,
 } from '../api/openf1'
 import type { DatasetName, RawSessionData, Session } from '../api/types'
 
@@ -33,6 +34,7 @@ const DATASETS: { name: DatasetName; fetch: (s: Session, live?: boolean) => Prom
   { name: 'pits', fetch: getPits },
   { name: 'raceControl', fetch: getRaceControl },
   { name: 'positions', fetch: getPositions },
+  { name: 'weather', fetch: getWeather },
   { name: 'intervals', fetch: getIntervals },
 ]
 

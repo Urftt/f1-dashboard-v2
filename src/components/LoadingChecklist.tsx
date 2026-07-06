@@ -8,6 +8,7 @@ const LABELS: Record<DatasetName, string> = {
   pits: 'Pit stops',
   raceControl: 'Race control',
   positions: 'Positions',
+  weather: 'Weather',
   intervals: 'Intervals',
 }
 

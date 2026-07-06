@@ -758,3 +758,13 @@ table.timing .down {
 table.timing .griddelta {
   font-size: 10.5px;
 }
+
+.clockbar .weather {
+  color: var(--text-faint);
+  font-size: 12px;
+}
+
+.clockbar .weather .rain {
+  color: var(--blue);
+  font-weight: 700;
+}

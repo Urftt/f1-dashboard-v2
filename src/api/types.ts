@@ -92,6 +92,15 @@ export interface PositionRow {
   position: number
 }
 
+export interface WeatherRow {
+  date: string
+  air_temperature: number | null
+  track_temperature: number | null
+  rainfall: number | null // 0/1
+  humidity: number | null
+  wind_speed: number | null
+}
+
 // Final classification — SPOILER. Only ever fetched in full-session mode.
 export interface SessionResultRow {
   position: number | null
@@ -114,6 +123,7 @@ export interface RawSessionData {
   intervals: IntervalRow[]
   raceControl: RaceControlMsg[]
   positions: PositionRow[]
+  weather: WeatherRow[]
 }
 
 export type DatasetName = keyof Omit<RawSessionData, 'session'>
