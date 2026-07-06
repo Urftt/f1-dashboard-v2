@@ -53,6 +53,16 @@ function gapSeries(clamped: ClampedSession, a: number, b: number): GapPoint[] {
   const end = Math.min(A[A.length - 1].t, B[B.length - 1].t)
   if (end <= start) return []
 
+  // staleness threshold adapts to the data's cadence: 2024+ intervals arrive
+  // every ~4s, 2023 every ~40s — a fixed cutoff would blank old seasons
+  const cadence = (arr: { t: number }[]) => {
+    const gaps = []
+    for (let i = 1; i < Math.min(arr.length, 200); i++) gaps.push(arr[i].t - arr[i - 1].t)
+    gaps.sort((x, y) => x - y)
+    return gaps.length ? gaps[Math.floor(gaps.length / 2)] : 5_000
+  }
+  const staleMs = Math.max(20_000, 2.5 * Math.max(cadence(A), cadence(B)))
+
   const out: GapPoint[] = []
   let ia = 0
   let ib = 0
@@ -60,8 +70,8 @@ function gapSeries(clamped: ClampedSession, a: number, b: number): GapPoint[] {
     while (ia + 1 < A.length && A[ia + 1].t <= t) ia++
     while (ib + 1 < B.length && B[ib + 1].t <= t) ib++
     // drop grid points where either driver's data is stale (pit lane, crash,
-    // lapped-car strings) — a last-known value older than ~20s is a lie
-    if (t - A[ia].t > 20_000 || t - B[ib].t > 20_000) continue
+    // lapped-car strings) — a long-stale last-known value is a lie
+    if (t - A[ia].t > staleMs || t - B[ib].t > staleMs) continue
     out.push({ min: (t - t0) / 60_000, gap: A[ia].v - B[ib].v })
   }
 
