@@ -6,6 +6,7 @@ import LoadingChecklist from '../components/LoadingChecklist'
 import ClockBar from '../components/ClockBar'
 import DriverSelect, { useSelectedDrivers } from '../components/DriverSelect'
 import LapChart from '../components/LapChart'
+import GapChart from '../components/GapChart'
 
 export default function RacePage() {
   const { sessions, meeting, loading, error } = useWeekend()
@@ -33,6 +34,7 @@ export default function RacePage() {
       <div className="race-grid">
         <div className="left">
           <LapChart clamped={clamped} selected={selected} />
+          <GapChart clamped={clamped} selected={selected} />
         </div>
         <div className="right">
           <div className="panel">

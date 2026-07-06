@@ -418,3 +418,13 @@ button:focus-visible {
     grid-template-columns: 1fr;
   }
 }
+
+.gap-hint {
+  color: var(--text-faint);
+  font-size: 11px;
+}
+
+.gap-annotation {
+  color: var(--blue);
+  font-size: 12px;
+}
