@@ -120,9 +120,28 @@ export default function GapChart({ clamped, selected }: Props) {
 
   const rate = useMemo(() => closingRate(pts, 5 * medianLapMin), [pts, medianLapMin])
 
+  const pitMarks = useMemo(() => {
+    const t0 = clamped.raceStartMs
+    if (t0 == null || effA == null || effB == null) return []
+    return clamped.pits
+      .filter((p) => p.driver_number === effA || p.driver_number === effB)
+      .map((p) => ({
+        min: (new Date(p.date).getTime() - t0) / 60_000,
+        driver: p.driver_number,
+      }))
+  }, [clamped, effA, effB])
+
+  // trend projection is meaningless across a pit stop — suppress it until
+  // the fit window is clean again
   const last = pts[pts.length - 1]
+  const fitWindow = 5 * medianLapMin
+  const pitInWindow =
+    last != null && pitMarks.some((p) => p.min >= last.min - fitWindow && p.min <= last.min)
+
   let annotation: string | null = null
-  if (rate != null && last) {
+  if (last && pitInWindow) {
+    annotation = 'gap settling after pit stop'
+  } else if (rate != null && last) {
     const perLap = rate * medianLapMin
     if (Math.abs(perLap) >= 0.05) {
       const closing = Math.sign(perLap) !== Math.sign(last.gap || 1)
@@ -134,17 +153,6 @@ export default function GapChart({ clamped, selected }: Props) {
       }
     }
   }
-
-  const pitMarks = useMemo(() => {
-    const t0 = clamped.raceStartMs
-    if (t0 == null || effA == null || effB == null) return []
-    return clamped.pits
-      .filter((p) => p.driver_number === effA || p.driver_number === effB)
-      .map((p) => ({
-        min: (new Date(p.date).getTime() - t0) / 60_000,
-        driver: p.driver_number,
-      }))
-  }, [clamped, effA, effB])
 
   const dA = drv(effA)
   const dB = drv(effB)
