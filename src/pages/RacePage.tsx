@@ -10,6 +10,9 @@ import GapChart from '../components/GapChart'
 import TimingBoard from '../components/TimingBoard'
 import PitWindow from '../components/PitWindow'
 import LiveControl, { isSessionLiveNow } from '../components/LiveControl'
+import PositionChart from '../components/PositionChart'
+import StrategyTimeline from '../components/StrategyTimeline'
+import RaceControlFeed from '../components/RaceControlFeed'
 import { useClock } from '../replay/ClockContext'
 
 export default function RacePage() {
@@ -63,6 +66,7 @@ export default function RacePage() {
         <div className="left">
           <LapChart clamped={clamped} selected={selected} />
           <GapChart clamped={clamped} selected={selected} />
+          <PositionChart clamped={clamped} selected={selected} />
         </div>
         <div className="right">
           <TimingBoard
@@ -72,7 +76,11 @@ export default function RacePage() {
             onSelect={setSelected}
           />
           <PitWindow clamped={clamped} selected={selected} />
+          <RaceControlFeed clamped={clamped} />
         </div>
+      </div>
+      <div style={{ marginTop: 12 }}>
+        <StrategyTimeline clamped={clamped} selected={selected} onSelect={setSelected} />
       </div>
     </div>
   )
