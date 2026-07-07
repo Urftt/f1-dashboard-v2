@@ -14,6 +14,7 @@ import { ensureSessionLoaded, useSessionEntry } from '../data/sessionStore'
 import { useClampedSession } from '../replay/useClampedSession'
 import { useClock } from '../replay/ClockContext'
 import LoadingChecklist from '../components/LoadingChecklist'
+import SectorTable from '../components/SectorTable'
 import ClockBar from '../components/ClockBar'
 import DriverSelect, { useSelectedDrivers, isSecondCar } from '../components/DriverSelect'
 import { driverColor, fmtLapTime } from '../race/analysis'
@@ -72,14 +73,19 @@ export default function QualiPage() {
           start, or switch to <b>Full session</b> to analyse it.
         </div>
       ) : (
-        <div className="race-grid">
-          <div className="left">
-            <QualiChart clamped={clamped} selected={selected} />
+        <>
+          <div className="race-grid">
+            <div className="left">
+              <QualiChart clamped={clamped} selected={selected} />
+            </div>
+            <div className="right">
+              <QualiTable clamped={clamped} selected={selected} onSelect={setSelected} />
+            </div>
           </div>
-          <div className="right">
-            <QualiTable clamped={clamped} selected={selected} onSelect={setSelected} />
+          <div style={{ marginTop: 12 }}>
+            <SectorTable clamped={clamped} selected={selected} onSelect={setSelected} />
           </div>
-        </div>
+        </>
       )}
     </div>
   )
