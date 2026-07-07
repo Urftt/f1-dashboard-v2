@@ -12,6 +12,7 @@ import {
 import { useWeekend } from '../data/WeekendContext'
 import { ensureSessionLoaded, useSessionEntry } from '../data/sessionStore'
 import LoadingChecklist from '../components/LoadingChecklist'
+import PaceScatter from '../components/PaceScatter'
 import DriverSelect, { useSelectedDrivers } from '../components/DriverSelect'
 import {
   COMPOUND_COLORS,
@@ -64,6 +65,7 @@ export default function PracticePage() {
       <div className="race-grid">
         <div className="left">
           <DegradationChart clamped={clamped} selected={selected} />
+          <PaceScatter clamped={clamped} selected={selected} />
         </div>
         <div className="right">
           <PaceTable clamped={clamped} selected={selected} onSelect={setSelected} />
