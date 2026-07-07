@@ -3,7 +3,7 @@
 // up to the replay clock). Whole field in faint grey, selected drivers in
 // team colors.
 
-import { useMemo } from 'react'
+import { memo, useMemo } from 'react'
 import {
   CartesianGrid,
   Line,
@@ -22,7 +22,7 @@ interface Props {
   selected: number[]
 }
 
-export default function PositionChart({ clamped, selected }: Props) {
+function PositionChart({ clamped, selected }: Props) {
   const { series, maxLap, fieldSize } = useMemo(() => {
     // completion order per lap number
     const byLap = new Map<number, { driver: number; completion: number }[]>()
@@ -141,3 +141,5 @@ function PosTooltip({ active, payload, label, acr }: any) {
     </div>
   )
 }
+
+export default memo(PositionChart)

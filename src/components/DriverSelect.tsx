@@ -2,7 +2,7 @@
 // (?d=1,63) so reloads keep it. Teammate #2 gets a dashed underline to match
 // the dashed chart line.
 
-import { useMemo } from 'react'
+import { memo, useCallback, useMemo } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import type { Driver } from '../api/types'
 import { driverColor } from '../race/analysis'
@@ -22,19 +22,23 @@ export function useSelectedDrivers(): [number[], (next: SelectedUpdater) => void
   const selected = useMemo(() => parseSelected(params.get('d')), [params])
 
   // functional updater reads the CURRENT params so rapid clicks don't lose
-  // each other's updates
-  const set = (next: SelectedUpdater) => {
-    setParams(
-      (p) => {
-        const np = new URLSearchParams(p)
-        const resolved = typeof next === 'function' ? next(parseSelected(np.get('d'))) : next
-        if (resolved.length) np.set('d', resolved.join(','))
-        else np.delete('d')
-        return np
-      },
-      { replace: true },
-    )
-  }
+  // each other's updates; useCallback keeps the identity stable so memoized
+  // panels don't re-render on every clock tick
+  const set = useCallback(
+    (next: SelectedUpdater) => {
+      setParams(
+        (p) => {
+          const np = new URLSearchParams(p)
+          const resolved = typeof next === 'function' ? next(parseSelected(np.get('d'))) : next
+          if (resolved.length) np.set('d', resolved.join(','))
+          else np.delete('d')
+          return np
+        },
+        { replace: true },
+      )
+    },
+    [setParams],
+  )
   return [selected, set]
 }
 
@@ -55,7 +59,7 @@ interface Props {
   onChange: (next: SelectedUpdater) => void
 }
 
-export default function DriverSelect({ drivers, selected, onChange }: Props) {
+export default memo(function DriverSelect({ drivers, selected, onChange }: Props) {
   const sorted = [...drivers].sort((a, b) => {
     const t = (a.team_name ?? '').localeCompare(b.team_name ?? '')
     return t !== 0 ? t : a.driver_number - b.driver_number
@@ -96,4 +100,4 @@ export default function DriverSelect({ drivers, selected, onChange }: Props) {
       )}
     </div>
   )
-}
+})

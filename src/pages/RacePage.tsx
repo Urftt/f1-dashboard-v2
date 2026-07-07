@@ -31,9 +31,13 @@ export default function RacePage() {
   }, [race])
 
   const entry = useSessionEntry(race?.session_key ?? null)
-  const { clamped, UNSAFE_prep } = useClampedSession(race)
+  const { clamped, UNSAFE_prep, pending } = useClampedSession(race)
   const [selected, setSelected] = useSelectedDrivers()
   const { t, mode } = useClock()
+
+  // quantized so the memoized board re-renders at clamp cadence, not per tick
+  const tq = mode === 'full' || t == null ? null : Math.floor(t / 2000) * 2000
+  const intervalsPending = pending.includes('intervals')
 
   if (error) return <div className="placeholder">{error}</div>
   if (loading || !meeting) return <div className="placeholder">Loading weekend…</div>
@@ -65,15 +69,16 @@ export default function RacePage() {
       <div className="race-grid">
         <div className="left">
           <LapChart clamped={clamped} selected={selected} />
-          <GapChart clamped={clamped} selected={selected} />
+          <GapChart clamped={clamped} selected={selected} loadingData={intervalsPending} />
           <PositionChart clamped={clamped} selected={selected} />
         </div>
         <div className="right">
           <TimingBoard
             clamped={clamped}
-            t={mode === 'full' ? null : t}
+            t={tq}
             selected={selected}
             onSelect={setSelected}
+            loadingData={intervalsPending}
           />
           <PitWindow clamped={clamped} selected={selected} />
           <RaceControlFeed clamped={clamped} />

@@ -27,16 +27,27 @@ export interface SessionEntry {
   status: Record<DatasetName, DatasetStatus>
 }
 
-const DATASETS: { name: DatasetName; fetch: (s: Session, live?: boolean) => Promise<unknown[]> }[] = [
+// Ordered by how soon the UI needs them; the paced queue dispatches in this
+// order, so core panels render before the big intervals payload arrives.
+// `skip` marks datasets that don't exist / aren't used for a session type —
+// intervals and positions are race-only, so quali/practice load ~1s faster.
+const DATASETS: {
+  name: DatasetName
+  fetch: (s: Session, live?: boolean) => Promise<unknown[]>
+  skip?: (s: Session) => boolean
+}[] = [
   { name: 'drivers', fetch: getDrivers },
   { name: 'laps', fetch: getLaps },
   { name: 'stints', fetch: getStints },
   { name: 'pits', fetch: getPits },
   { name: 'raceControl', fetch: getRaceControl },
-  { name: 'positions', fetch: getPositions },
+  { name: 'positions', fetch: getPositions, skip: (s) => s.session_type !== 'Race' },
   { name: 'weather', fetch: getWeather },
-  { name: 'intervals', fetch: getIntervals },
+  { name: 'intervals', fetch: getIntervals, skip: (s) => s.session_type !== 'Race' },
 ]
+
+/** datasets the page needs before it can render at all */
+export const CORE_DATASETS: DatasetName[] = ['drivers', 'laps', 'stints', 'pits', 'raceControl']
 
 const entries = new Map<number, SessionEntry>()
 const listeners = new Set<() => void>()
@@ -54,8 +65,17 @@ function patch(key: number, fn: (e: SessionEntry) => SessionEntry) {
 
 function loadDataset(session: Session, name: DatasetName, live = false) {
   const key = session.session_key
+  const def = DATASETS.find((d) => d.name === name)!
+  if (def.skip?.(session)) {
+    patch(key, (e) => ({
+      ...e,
+      data: { ...e.data, [name]: [] },
+      status: { ...e.status, [name]: 'ready' },
+    }))
+    return
+  }
   patch(key, (e) => ({ ...e, status: { ...e.status, [name]: 'loading' } }))
-  DATASETS.find((d) => d.name === name)!
+  def
     .fetch(session, live)
     .then((rows) => {
       patch(key, (e) => ({
@@ -101,4 +121,14 @@ export function useSessionEntry(sessionKey: number | null): SessionEntry | null 
 
 export function isEntryComplete(e: SessionEntry | null): boolean {
   return !!e && Object.values(e.status).every((s) => s === 'ready')
+}
+
+export function hasDatasets(e: SessionEntry | null, names: DatasetName[]): boolean {
+  return !!e && names.every((n) => e.status[n] === 'ready')
+}
+
+/** dataset names still loading (not ready, not errored) */
+export function pendingDatasets(e: SessionEntry | null): DatasetName[] {
+  if (!e) return []
+  return (Object.keys(e.status) as DatasetName[]).filter((n) => e.status[n] === 'loading')
 }

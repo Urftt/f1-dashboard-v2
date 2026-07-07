@@ -7,7 +7,7 @@
 //    drivers who pitted on different laps overlay directly, so stint pace
 //    and degradation compare like-for-like.
 
-import { useMemo, useState } from 'react'
+import { memo, useMemo, useState } from 'react'
 import {
   CartesianGrid,
   Line,
@@ -47,7 +47,7 @@ interface LineDef {
   compound?: string
 }
 
-export default function LapChart({ clamped, selected }: Props) {
+function LapChart({ clamped, selected }: Props) {
   const [cleanOnly, setCleanOnly] = useState(true)
   const [xMode, setXMode] = useState<'lap' | 'age'>('lap')
 
@@ -261,3 +261,5 @@ function LapTooltip({ active, payload, label, clamped, xMode }: any) {
     </div>
   )
 }
+
+export default memo(LapChart)

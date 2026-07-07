@@ -1,7 +1,7 @@
 // Clamped race-control messages, newest first. Penalties and safety cars
 // are exactly the things a broadcast under-reports.
 
-import { useMemo } from 'react'
+import { memo, useMemo } from 'react'
 import type { ClampedSession } from '../replay/clamp'
 
 const MAX_SHOWN = 40
@@ -14,7 +14,7 @@ function msgClass(category: string, message: string): string {
   return ''
 }
 
-export default function RaceControlFeed({ clamped }: { clamped: ClampedSession }) {
+function RaceControlFeed({ clamped }: { clamped: ClampedSession }) {
   const msgs = useMemo(
     () =>
       clamped.raceControl
@@ -44,3 +44,5 @@ export default function RaceControlFeed({ clamped }: { clamped: ClampedSession }
     </div>
   )
 }
+
+export default memo(RaceControlFeed)

@@ -3,7 +3,7 @@
 // driver has produced no data for a while (crashed/retired — but we never
 // SAY that; "no data" is spoiler-neutral).
 
-import { useMemo, useState } from 'react'
+import { memo, useMemo, useState } from 'react'
 import type { IntervalRow } from '../api/types'
 import type { ClampedSession } from '../replay/clamp'
 import {
@@ -22,6 +22,8 @@ interface Props {
   t: number | null // virtual time (null in full mode)
   selected: number[]
   onSelect: (u: SelectedUpdater) => void
+  /** intervals dataset still downloading */
+  loadingData?: boolean
 }
 
 interface BoardRow {
@@ -40,7 +42,7 @@ interface BoardRow {
   stale: boolean
 }
 
-export default function TimingBoard({ clamped, t, selected, onSelect }: Props) {
+function TimingBoard({ clamped, t, selected, onSelect, loadingData }: Props) {
   const [gapMode, setGapMode] = useState<'interval' | 'leader'>('interval')
 
   const rows = useMemo(() => {
@@ -155,7 +157,9 @@ export default function TimingBoard({ clamped, t, selected, onSelect }: Props) {
         </div>
       </div>
       {!anyData ? (
-        <div className="placeholder">No timing data yet.</div>
+        <div className="placeholder">
+          {loadingData ? 'Loading timing data…' : 'No timing data yet.'}
+        </div>
       ) : (
         <table className="timing num">
           <thead>
@@ -257,3 +261,5 @@ export default function TimingBoard({ clamped, t, selected, onSelect }: Props) {
     </div>
   )
 }
+
+export default memo(TimingBoard)

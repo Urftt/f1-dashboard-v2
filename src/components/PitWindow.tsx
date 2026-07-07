@@ -2,7 +2,7 @@
 // pit RIGHT NOW (current gap-to-leader + pit loss), who they rejoin next to,
 // and what an undercut on the car ahead would need. Clamped data only.
 
-import { useMemo, useState } from 'react'
+import { memo, useMemo, useState } from 'react'
 import type { ClampedSession } from '../replay/clamp'
 import { driverColor } from '../race/analysis'
 
@@ -17,7 +17,7 @@ interface Standing {
   interval: number | null
 }
 
-export default function PitWindow({ clamped, selected }: Props) {
+function PitWindow({ clamped, selected }: Props) {
   const [pitLossOverride, setPitLossOverride] = useState<string>('')
 
   // median observed pit-lane time + 3s for the slow-down/speed-up delta
@@ -116,3 +116,5 @@ export default function PitWindow({ clamped, selected }: Props) {
     </div>
   )
 }
+
+export default memo(PitWindow)

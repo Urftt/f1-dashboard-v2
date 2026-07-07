@@ -2,7 +2,7 @@
 // grid. Positive = A behind B. Shows closing rate and projected contact,
 // computed ONLY from clamped (already-seen) data.
 
-import { useMemo, useState } from 'react'
+import { memo, useMemo, useState } from 'react'
 import {
   CartesianGrid,
   Line,
@@ -22,6 +22,8 @@ const MAX_POINTS = 1500
 interface Props {
   clamped: ClampedSession
   selected: number[]
+  /** intervals dataset still downloading */
+  loadingData?: boolean
 }
 
 interface GapPoint {
@@ -104,7 +106,7 @@ function closingRate(pts: GapPoint[], windowMin: number): number | null {
   return (n * sxy - sx * sy) / denom
 }
 
-export default function GapChart({ clamped, selected }: Props) {
+function GapChart({ clamped, selected, loadingData }: Props) {
   const [a, setA] = useState<number | null>(null)
   const [b, setB] = useState<number | null>(null)
 
@@ -216,7 +218,9 @@ export default function GapChart({ clamped, selected }: Props) {
         {effA == null || effB == null ? (
           <div className="placeholder">Pick two drivers (or select two above).</div>
         ) : pts.length < 2 ? (
-          <div className="placeholder">Not enough shared running yet.</div>
+          <div className="placeholder">
+            {loadingData ? 'Loading interval data…' : 'Not enough shared running yet.'}
+          </div>
         ) : (
           <ResponsiveContainer width="100%" height={260}>
             <LineChart data={pts} margin={{ top: 8, right: 12, bottom: 4, left: 4 }}>
@@ -286,3 +290,5 @@ function GapTooltip({ active, payload, label, a, b }: any) {
     </div>
   )
 }
+
+export default memo(GapChart)

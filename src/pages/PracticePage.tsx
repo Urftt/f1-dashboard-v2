@@ -75,15 +75,16 @@ export default function PracticePage() {
 
 // practice page always shows the complete session, independent of the clock
 import type { Session } from '../api/types'
-import { isEntryComplete } from '../data/sessionStore'
+import { CORE_DATASETS, hasDatasets } from '../data/sessionStore'
 import { clampPrepared, prepareSession } from '../replay/clamp'
 
 function useClampedSessionFull(session: Session | null): { clamped: ClampedSession | null } {
   const entry = useSessionEntry(session?.session_key ?? null)
+  const coreReady = hasDatasets(entry, CORE_DATASETS)
   const clamped = useMemo(() => {
-    if (!entry || !isEntryComplete(entry)) return null
+    if (!entry || !coreReady) return null
     return clampPrepared(prepareSession(entry.data, entry.session), null)
-  }, [entry])
+  }, [entry, coreReady])
   return { clamped }
 }
 

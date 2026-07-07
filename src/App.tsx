@@ -3,6 +3,7 @@ import RacePage from './pages/RacePage'
 import QualiPage from './pages/QualiPage'
 import PracticePage from './pages/PracticePage'
 import WeekendPicker from './components/WeekendPicker'
+import ErrorBoundary from './components/ErrorBoundary'
 import { WeekendProvider } from './data/WeekendContext'
 import { ClockProvider } from './replay/ClockContext'
 
@@ -36,11 +37,13 @@ export default function App() {
             <WeekendPicker />
           </header>
           <main className="main">
-            <Routes>
-              <Route path="/" element={<RacePage />} />
-              <Route path="/quali" element={<QualiPage />} />
-              <Route path="/practice" element={<PracticePage />} />
-            </Routes>
+            <ErrorBoundary>
+              <Routes>
+                <Route path="/" element={<RacePage />} />
+                <Route path="/quali" element={<QualiPage />} />
+                <Route path="/practice" element={<PracticePage />} />
+              </Routes>
+            </ErrorBoundary>
           </main>
         </div>
       </ClockProvider>

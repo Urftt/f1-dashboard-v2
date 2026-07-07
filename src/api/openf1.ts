@@ -24,6 +24,10 @@ interface Envelope<T> {
   v: T
 }
 
+// concurrent callers of the same key share one request instead of burning
+// two slots in the rate-limited queue
+const inFlight = new Map<string, Promise<unknown>>()
+
 async function cached<T>(key: string, ttlMs: number, fetcher: () => Promise<T>): Promise<T> {
   try {
     const hit = (await idbGet(key)) as Envelope<T> | undefined
@@ -31,15 +35,26 @@ async function cached<T>(key: string, ttlMs: number, fetcher: () => Promise<T>):
   } catch {
     // IDB unavailable — fall through to network
   }
-  const v = await fetcher()
-  if (ttlMs > 0) {
-    try {
-      await idbSet(key, { t: Date.now(), v })
-    } catch {
-      // cache is an optimization, never a dependency
+  const existing = inFlight.get(key)
+  if (existing) return existing as Promise<T>
+
+  const p = (async () => {
+    const v = await fetcher()
+    if (ttlMs > 0) {
+      try {
+        await idbSet(key, { t: Date.now(), v })
+      } catch {
+        // cache is an optimization, never a dependency
+      }
     }
+    return v
+  })()
+  inFlight.set(key, p)
+  try {
+    return await p
+  } finally {
+    inFlight.delete(key)
   }
-  return v
 }
 
 /** Sessions whose end time has passed are immutable. */

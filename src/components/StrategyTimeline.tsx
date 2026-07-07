@@ -3,7 +3,7 @@
 // are already truncated at the current lap, so this is spoiler-safe by
 // construction. Pure CSS — no chart library.
 
-import { useMemo } from 'react'
+import { memo, useMemo } from 'react'
 import type { ClampedSession } from '../replay/clamp'
 import { COMPOUND_COLORS, COMPOUND_LETTER, driverColor } from '../race/analysis'
 import type { SelectedUpdater } from './DriverSelect'
@@ -14,7 +14,7 @@ interface Props {
   onSelect: (u: SelectedUpdater) => void
 }
 
-export default function StrategyTimeline({ clamped, selected, onSelect }: Props) {
+function StrategyTimeline({ clamped, selected, onSelect }: Props) {
   const { rows, maxLap } = useMemo(() => {
     // order rows by current race position (same source as the timing board)
     const lastPos = new Map<number, number>()
@@ -108,3 +108,5 @@ export default function StrategyTimeline({ clamped, selected, onSelect }: Props)
     </div>
   )
 }
+
+export default memo(StrategyTimeline)
